@@ -1,12 +1,12 @@
 # GO-WORLD
 -------------
 
-Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of world used in this port is 0.1.2.
+Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.2.
 
 Check [original site](http://ml.cs.yamanashi.ac.jp/world/) for details about the 
-world. 
+WORLD. 
 
-## Install world
+## Install WORLD
 
      git clone git@github.com:r9y9/world.git && cd world
      ./waf configure && ./waf
@@ -14,7 +14,7 @@ world.
 
 or download the original code and make & install it (not tested).
 
-## Install go-world
+## Install GO-WORLD
 
     go get github.com/r9y9/go-world
 
@@ -28,7 +28,7 @@ and create a world instance with sample rate [hz] and frame period [ms].
 
     w := world.New(sampleRate, framePeriod) // e.g. (44100, 5)
 
-and then, do whatever you want with world.
+and then, do whatever you want with WORLD.
 
 ### Dio
 
@@ -46,7 +46,7 @@ and then, do whatever you want with world.
 
     synthesized := w.Synthesis(f0, spectrogram, residual, len(input))
 
-...check go codes more about go-world.
+...check go codes more about GO-WORLD.
 
 ## Example
 
