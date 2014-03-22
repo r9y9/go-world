@@ -50,7 +50,7 @@ and then, do whatever you want with world.
 
 ## Example
 
-see [example/world_examle.go](example/world_examle.go)
+see [example/world_example.go](example/world_example.go)
 
 ## Docmentation
 
