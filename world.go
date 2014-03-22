@@ -1,4 +1,4 @@
-// Package world provide ports to WORLD - a high-quality speech analysis, modification and synthesis system written in C++.
+// Package world provide a Go interface to WORLD - a high-quality speech analysis, modification and synthesis system.
 package world
 
 // Functions in this file ara simple ports to original cpp functions.
