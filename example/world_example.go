@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mjibson/go-dsp/wav"
+	"github.com/r9y9/go-dsp/wav"
 	"github.com/r9y9/go-world"
 	"log"
 	"os"
+	"time"
 )
 
 var defaultDioOption = world.DioOption{
@@ -70,16 +71,9 @@ func worldExampleApOld(input []float64, sampleRate int) []float64 {
 	return w.SynthesisFromAperiodicityOld(f0, spectrogram, apiriodicity, targetF0, len(input))
 }
 
-func GetMonoDataFromWavData(data [][]int) []float64 {
-	y := make([]float64, len(data))
-	for i, val := range data {
-		y[i] = float64(val[0])
-	}
-	return y
-}
-
 func main() {
-	ifilename := flag.String("i", "default.wav", "Input filename")
+	ifilename := flag.String("i", "input.wav", "Input filename")
+	ofilename := flag.String("o", "output.wav", "Output filename")
 	flag.Parse()
 
 	file, err := os.Open(*ifilename)
@@ -94,16 +88,22 @@ func main() {
 		log.Fatal(werr)
 	}
 
-	input := GetMonoDataFromWavData(w.Data)
+	input := w.GetMonoData()
 	sampleRate := int(w.SampleRate)
 
 	// WORLD examples
+	start := time.Now()
 	synthesized := worldExample(input, sampleRate)
 	//synthesized := worldExampleAp(input, sampleRate)
 	//synthesized := worldExampleApOld(input, sampleRate)
 
-	// Print the input signal and synthesized signal
-	for i := range synthesized {
-		fmt.Println(i, input[i], synthesized[i])
+	// Output elapsed timme
+	fmt.Println("Finished. Elapsed time:", time.Now().Sub(start))
+
+	// Write to file
+	werr = wav.WriteMono(*ofilename, synthesized, w.SampleRate)
+	if werr != nil {
+		log.Fatal(werr)
 	}
+	fmt.Println(*ofilename, "is created.")
 }
