@@ -25,6 +25,10 @@ func (w *World) Dio(x []float64, option DioOption) ([]float64, []float64) {
 	return Dio(x, w.Fs, option)
 }
 
+func (w *World) StoneMask(x []float64, timeAxis, f0 []float64) []float64 {
+	return StoneMask(x, w.Fs, timeAxis, f0)
+}
+
 func (w *World) Star(x []float64, timeAxis, f0 []float64) [][]float64 {
 	return Star(x, w.Fs, timeAxis, f0)
 }
@@ -37,10 +41,20 @@ func (w *World) Synthesis(f0 []float64, spectrogram, residualSpectrogram [][]flo
 	return Synthesis(f0, spectrogram, residualSpectrogram, w.FramePeriod, w.Fs, length)
 }
 
-func (w *World) AperiodicityRatio(x []float64, f0 []float64) ([][]float64, float64) {
-	return AperiodicityRatio(x, w.Fs, f0, w.FramePeriod)
+func (w *World) AperiodicityRatio(x []float64, f0 []float64, timeAxis []float64) [][]float64 {
+	return AperiodicityRatio(x, w.Fs, f0, timeAxis)
 }
 
-func (w *World) SynthesisFromAperiodicity(f0 []float64, spectrogram, aperiodicity [][]float64, targetF0 float64, length int) []float64 {
-	return SynthesisFromAperiodicity(f0, spectrogram, aperiodicity, targetF0, w.FramePeriod, w.Fs, length)
+func (w *World) SynthesisFromAperiodicity(f0 []float64, spectrogram, aperiodicity [][]float64, length int) []float64 {
+	return SynthesisFromAperiodicity(f0, spectrogram, aperiodicity, w.FramePeriod, w.Fs, length)
+}
+
+// deprecated (will be removed)
+func (w *World) AperiodicityRatioOld(x []float64, f0 []float64) ([][]float64, float64) {
+	return AperiodicityRatioOld(x, w.Fs, f0, w.FramePeriod)
+}
+
+// deprecated (will be removed)
+func (w *World) SynthesisFromAperiodicityOld(f0 []float64, spectrogram, aperiodicity [][]float64, targetF0 float64, length int) []float64 {
+	return SynthesisFromAperiodicityOld(f0, spectrogram, aperiodicity, targetF0, w.FramePeriod, w.Fs, length)
 }

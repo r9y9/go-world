@@ -6,9 +6,12 @@ package world
 
 // #cgo pkg-config: world
 // #include <world/dio.h>
+// #include <world/stonemask.h>
 // #include <world/platinum.h>
 // #include <world/synthesis.h>
 // #include <world/star.h>
+// #include <world/aperiodicity.h>
+// #include <world/synthesisfromaperiodicity.h>
 // #include <world/tandem_ap.h>
 // #include <world/synthesis_ap.h>
 // #include <stdlib.h>
@@ -33,10 +36,10 @@ type DioOption struct {
 func NewDioOption() DioOption {
 	opt := DioOption{
 		F0Floor:          80.0,
-		F0Ceil:           640.0,
+		F0Ceil:           800.0,
 		FramePeriod:      5,
 		ChannelsInOctave: 4.0,
-		Speed:            6,
+		Speed:            2,
 	}
 	return opt
 }
@@ -55,7 +58,7 @@ func Dio(x []float64, fs int, option DioOption) ([]float64, []float64) {
 	opt.speed = C.int(option.Speed)
 
 	// Perform DIO
-	C.Dio2((*C.double)(&x[0]),
+	C.Dio((*C.double)(&x[0]),
 		C.int(len(x)),
 		C.int(fs),
 		opt,
@@ -69,9 +72,24 @@ func GetSamplesForDIO(fs, x_length int, framePeriod float64) int {
 	return int(C.GetSamplesForDIO(C.int(fs), C.int(x_length), C.double(framePeriod)))
 }
 
+func StoneMask(x []float64, fs int, timeAxis, f0 []float64) []float64 {
+	refinedF0 := make([]float64, len(f0))
+
+	// Perform StoneMask
+	C.StoneMask((*C.double)(&x[0]),
+		C.int(len(x)),
+		C.int(fs),
+		(*C.double)(&timeAxis[0]),
+		(*C.double)(&f0[0]),
+		C.int(len(f0)),
+		(*C.double)(&refinedF0[0]))
+
+	return refinedF0
+}
+
 func Star(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
-	numFreqBins := FFTSize/2 + 1
+	numFreqBins := C.size_t(FFTSize/2 + 1)
 
 	// Create workspace
 	wspace := make([]*C.double, len(f0))
@@ -155,7 +173,38 @@ func GetNumberOfBands(fs int) int {
 	return int(C.GetNumberOfBands(C.int(fs)))
 }
 
-func AperiodicityRatio(x []float64, fs int, f0 []float64, framePeriod float64) ([][]float64, float64) {
+func AperiodicityRatio(x []float64, fs int, f0, timeAxis []float64) [][]float64 {
+	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
+	numBins := C.size_t(FFTSize/2 + 1)
+
+	// Create workspace
+	wspace := make([]*C.double, len(f0))
+	for i := range wspace {
+		wspace[i] = (*C.double)(C.malloc(C.size_t(byteSizeOfFloat64 * numBins)))
+		defer C.free(unsafe.Pointer(wspace[i]))
+	}
+
+	// Peform aperiodicity analysis
+	C.AperiodicityRatio((*C.double)(&x[0]),
+		C.int(len(x)),
+		C.int(fs),
+		(*C.double)(&f0[0]),
+		C.int(len(f0)),
+		(*C.double)(&timeAxis[0]),
+		C.int(FFTSize),
+		(**C.double)(&wspace[0]))
+
+	// Copy to go slice
+	aperiodicity := make([][]float64, len(f0))
+	for i := range aperiodicity {
+		aperiodicity[i] = CArrayToGoSlice(wspace[i], C.int(numBins))
+	}
+
+	return aperiodicity
+}
+
+// deprecated (will be removed)
+func AperiodicityRatioOld(x []float64, fs int, f0 []float64, framePeriod float64) ([][]float64, float64) {
 	numBands := GetNumberOfBands(fs)
 
 	// Create workspace
@@ -166,7 +215,7 @@ func AperiodicityRatio(x []float64, fs int, f0 []float64, framePeriod float64) (
 	}
 
 	// Peform aperiodicity analysis
-	targetF0 := C.AperiodicityRatio((*C.double)(&x[0]),
+	targetF0 := C.AperiodicityRatioOld((*C.double)(&x[0]),
 		C.int(len(x)),
 		C.int(fs),
 		(*C.double)(&f0[0]),
@@ -183,7 +232,28 @@ func AperiodicityRatio(x []float64, fs int, f0 []float64, framePeriod float64) (
 	return aperiodicity, float64(targetF0)
 }
 
-func SynthesisFromAperiodicity(f0 []float64, spectrogram, aperiodicity [][]float64, targetF0, framePeriod float64, fs, length int) []float64 {
+func SynthesisFromAperiodicity(f0 []float64, spectrogram, aperiodicity [][]float64, framePeriod float64, fs, length int) []float64 {
+	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
+
+	spectrogramUsedInC := Make2DCArrayAlternative(spectrogram)
+	aperiodicityUsedInC := Make2DCArrayAlternative(aperiodicity)
+
+	synthesized := make([]float64, length)
+	C.SynthesisFromAperiodicity((*C.double)(&f0[0]),
+		C.int(len(f0)),
+		(**C.double)(&spectrogramUsedInC[0]),
+		(**C.double)(&aperiodicityUsedInC[0]),
+		C.int(FFTSize),
+		C.double(framePeriod),
+		C.int(fs),
+		C.int(len(synthesized)),
+		(*C.double)(&synthesized[0]))
+
+	return synthesized
+}
+
+// deprecated (will be removed)
+func SynthesisFromAperiodicityOld(f0 []float64, spectrogram, aperiodicity [][]float64, targetF0, framePeriod float64, fs, length int) []float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 	numBands := GetNumberOfBands(fs)
 
@@ -191,7 +261,7 @@ func SynthesisFromAperiodicity(f0 []float64, spectrogram, aperiodicity [][]float
 	aperiodicityUsedInC := Make2DCArrayAlternative(aperiodicity)
 
 	synthesized := make([]float64, length)
-	C.SynthesisFromAperiodicity((*C.double)(&f0[0]),
+	C.SynthesisFromAperiodicityOld((*C.double)(&f0[0]),
 		C.int(len(f0)),
 		(**C.double)(&spectrogramUsedInC[0]),
 		C.int(FFTSize),
