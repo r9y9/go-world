@@ -35,7 +35,7 @@ and then, do whatever you want with WORLD.
 
 ### StoneMask
 
-    refinedF0 = w.StoneMask(input, timeAxis, f0)
+    refinedF0 := w.StoneMask(input, timeAxis, f0)
 
 ### Star
 
@@ -49,7 +49,7 @@ and then, do whatever you want with WORLD.
 
     synthesized := w.Synthesis(f0, spectrogram, residual, len(input))
 
-...check go codes more about GO-WORLD.
+...check go codes to know more about GO-WORLD.
 
 ## Example
 
