@@ -1,10 +1,9 @@
 # GO-WORLD
 -------------
 
-Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.2.
+Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.3.
 
-Check [original site](http://ml.cs.yamanashi.ac.jp/world/) for details about the 
-WORLD. 
+Check [original site](http://ml.cs.yamanashi.ac.jp/world/) for details about the WORLD. 
 
 ## Install WORLD
 
@@ -33,6 +32,10 @@ and then, do whatever you want with WORLD.
 ### Dio
 
     timeAxis, f0 := w.Dio(input, w.NewDioOption()) // default option is used
+
+### StoneMask
+
+    refinedF0 = w.StoneMask(input, timeAxis, f0)
 
 ### Star
 
