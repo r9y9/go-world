@@ -17,10 +17,6 @@ package world
 // #include <stdlib.h>
 import "C"
 
-import (
-	"unsafe"
-)
-
 const (
 	byteSizeOfFloat64 = 8
 )
@@ -91,12 +87,12 @@ func Star(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 	numFreqBins := C.size_t(FFTSize/2 + 1)
 
-	// Create workspace
-	wspace := make([]*C.double, len(f0))
-	for i := range wspace {
-		wspace[i] = (*C.double)(C.malloc(byteSizeOfFloat64 * numFreqBins))
-		defer C.free(unsafe.Pointer(wspace[i]))
+	spectrogram := make([][]float64, len(f0))
+	for i := range spectrogram {
+		spectrogram[i] = make([]float64, numFreqBins)
 	}
+
+	spectrogramUsedInC := Make2DCArrayAlternative(spectrogram)
 
 	// Perform star
 	C.Star((*C.double)(&x[0]),
@@ -105,13 +101,7 @@ func Star(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
 		(*C.double)(&timeAxis[0]),
 		(*C.double)(&f0[0]),
 		C.int(len(f0)),
-		(**C.double)(&wspace[0]))
-
-	// Copy to go slice
-	spectrogram := make([][]float64, len(f0))
-	for i := range spectrogram {
-		spectrogram[i] = CArrayToGoSlice(wspace[i], C.int(numFreqBins))
-	}
+		(**C.double)(&spectrogramUsedInC[0]))
 
 	return spectrogram
 }
@@ -124,12 +114,13 @@ func Platinum(x []float64, fs int, timeAxis, f0 []float64, spectrogram [][]float
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 	numFreqBins := C.size_t(FFTSize + 1)
 
-	spectrogramUsedInC := Make2DCArrayAlternative(spectrogram)
-	residualSpectrogramUsedInC := make([]*C.double, len(spectrogram))
-	for i := range residualSpectrogramUsedInC {
-		residualSpectrogramUsedInC[i] = (*C.double)(C.malloc(byteSizeOfFloat64 * numFreqBins))
-		defer C.free(unsafe.Pointer(residualSpectrogramUsedInC[i]))
+	residualSpectrogram := make([][]float64, len(f0))
+	for i := range residualSpectrogram {
+		residualSpectrogram[i] = make([]float64, numFreqBins)
 	}
+
+	spectrogramUsedInC := Make2DCArrayAlternative(spectrogram)
+	residualSpectrogramUsedInC := Make2DCArrayAlternative(residualSpectrogram)
 
 	C.Platinum((*C.double)(&x[0]),
 		C.int(len(x)),
@@ -140,11 +131,6 @@ func Platinum(x []float64, fs int, timeAxis, f0 []float64, spectrogram [][]float
 		(**C.double)(&spectrogramUsedInC[0]),
 		C.int(FFTSize),
 		(**C.double)(&residualSpectrogramUsedInC[0]))
-
-	residualSpectrogram := make([][]float64, len(f0))
-	for i := range residualSpectrogramUsedInC {
-		residualSpectrogram[i] = CArrayToGoSlice(residualSpectrogramUsedInC[i], C.int(numFreqBins))
-	}
 
 	return residualSpectrogram
 }
@@ -177,12 +163,11 @@ func AperiodicityRatio(x []float64, fs int, f0, timeAxis []float64) [][]float64 
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 	numBins := C.size_t(FFTSize/2 + 1)
 
-	// Create workspace
-	wspace := make([]*C.double, len(f0))
-	for i := range wspace {
-		wspace[i] = (*C.double)(C.malloc(C.size_t(byteSizeOfFloat64 * numBins)))
-		defer C.free(unsafe.Pointer(wspace[i]))
+	aperiodicity := make([][]float64, len(f0))
+	for i := range aperiodicity {
+		aperiodicity[i] = make([]float64, numBins)
 	}
+	aperiodicityUsedInC := Make2DCArrayAlternative(aperiodicity)
 
 	// Peform aperiodicity analysis
 	C.AperiodicityRatio((*C.double)(&x[0]),
@@ -192,13 +177,7 @@ func AperiodicityRatio(x []float64, fs int, f0, timeAxis []float64) [][]float64 
 		C.int(len(f0)),
 		(*C.double)(&timeAxis[0]),
 		C.int(FFTSize),
-		(**C.double)(&wspace[0]))
-
-	// Copy to go slice
-	aperiodicity := make([][]float64, len(f0))
-	for i := range aperiodicity {
-		aperiodicity[i] = CArrayToGoSlice(wspace[i], C.int(numBins))
-	}
+		(**C.double)(&aperiodicityUsedInC[0]))
 
 	return aperiodicity
 }
@@ -207,12 +186,11 @@ func AperiodicityRatio(x []float64, fs int, f0, timeAxis []float64) [][]float64 
 func AperiodicityRatioOld(x []float64, fs int, f0 []float64, framePeriod float64) ([][]float64, float64) {
 	numBands := GetNumberOfBands(fs)
 
-	// Create workspace
-	wspace := make([]*C.double, len(f0))
-	for i := range wspace {
-		wspace[i] = (*C.double)(C.malloc(C.size_t(byteSizeOfFloat64 * numBands)))
-		defer C.free(unsafe.Pointer(wspace[i]))
+	aperiodicity := make([][]float64, len(f0))
+	for i := range aperiodicity {
+		aperiodicity[i] = make([]float64, numBands)
 	}
+	aperiodicityUsedInC := Make2DCArrayAlternative(aperiodicity)
 
 	// Peform aperiodicity analysis
 	targetF0 := C.AperiodicityRatioOld((*C.double)(&x[0]),
@@ -221,13 +199,7 @@ func AperiodicityRatioOld(x []float64, fs int, f0 []float64, framePeriod float64
 		(*C.double)(&f0[0]),
 		C.int(len(f0)),
 		C.double(framePeriod),
-		(**C.double)(&wspace[0]))
-
-	// Copy to go slice
-	aperiodicity := make([][]float64, len(f0))
-	for i := range aperiodicity {
-		aperiodicity[i] = CArrayToGoSlice(wspace[i], C.int(numBands))
-	}
+		(**C.double)(&aperiodicityUsedInC[0]))
 
 	return aperiodicity, float64(targetF0)
 }
