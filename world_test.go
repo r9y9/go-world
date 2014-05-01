@@ -53,6 +53,17 @@ func BenchmarkStar(b *testing.B) {
 	}
 }
 
+func BenchmarkCheapTrick(b *testing.B) {
+	sampleRate := 44100
+	w := New(sampleRate, defaultDioOption.FramePeriod)
+	x := createRandomSignal(10 * sampleRate)
+
+	timeAxis, f0 := w.Dio(x, defaultDioOption)
+	for i := 0; i < b.N; i++ {
+		w.CheapTrick(x, timeAxis, f0)
+	}
+}
+
 func BenchmarkPlatinum(b *testing.B) {
 	sampleRate := 44100
 	w := New(sampleRate, defaultDioOption.FramePeriod)

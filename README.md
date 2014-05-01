@@ -1,7 +1,7 @@
 # GO-WORLD
 -------------
 
-Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.3.
+Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.4.
 
 Check [original site](http://ml.cs.yamanashi.ac.jp/world/) for details about the WORLD. 
 
@@ -37,9 +37,13 @@ and then, do whatever you want with WORLD.
 
     refinedF0 := w.StoneMask(input, timeAxis, f0)
 
-### Star
+### Star (will be deprecated in 0.1.5)
 
     spectrogram := w.Star(input, timeAxis, f0)
+
+### CheapTrick (New in 0.1.4)
+
+    spectrogram := w.CheapTrick(input, timeAxis, f0)
 
 ### Platinum
 

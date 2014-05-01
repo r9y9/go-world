@@ -29,8 +29,13 @@ func (w *World) StoneMask(x []float64, timeAxis, f0 []float64) []float64 {
 	return StoneMask(x, w.Fs, timeAxis, f0)
 }
 
+// will be deprecated
 func (w *World) Star(x []float64, timeAxis, f0 []float64) [][]float64 {
 	return Star(x, w.Fs, timeAxis, f0)
+}
+
+func (w *World) CheapTrick(x []float64, timeAxis, f0 []float64) [][]float64 {
+	return CheapTrick(x, w.Fs, timeAxis, f0)
 }
 
 func (w *World) Platinum(x []float64, timeAxis, f0 []float64, spectrogram [][]float64) [][]float64 {
@@ -47,14 +52,4 @@ func (w *World) AperiodicityRatio(x []float64, f0 []float64, timeAxis []float64)
 
 func (w *World) SynthesisFromAperiodicity(f0 []float64, spectrogram, aperiodicity [][]float64, length int) []float64 {
 	return SynthesisFromAperiodicity(f0, spectrogram, aperiodicity, w.FramePeriod, w.Fs, length)
-}
-
-// deprecated (will be removed)
-func (w *World) AperiodicityRatioOld(x []float64, f0 []float64) ([][]float64, float64) {
-	return AperiodicityRatioOld(x, w.Fs, f0, w.FramePeriod)
-}
-
-// deprecated (will be removed)
-func (w *World) SynthesisFromAperiodicityOld(f0 []float64, spectrogram, aperiodicity [][]float64, targetF0 float64, length int) []float64 {
-	return SynthesisFromAperiodicityOld(f0, spectrogram, aperiodicity, targetF0, w.FramePeriod, w.Fs, length)
 }

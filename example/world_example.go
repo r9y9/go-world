@@ -18,6 +18,7 @@ var defaultDioOption = world.DioOption{
 	Speed:            2,
 }
 
+// v0.1.3
 func worldExample(input []float64, sampleRate int) []float64 {
 	w := world.New(sampleRate, defaultDioOption.FramePeriod)
 
@@ -54,21 +55,24 @@ func worldExampleAp(input []float64, sampleRate int) []float64 {
 	return w.SynthesisFromAperiodicity(f0, spectrogram, apiriodicity, len(input))
 }
 
-// v0.1.2 (will be removed)
-func worldExampleApOld(input []float64, sampleRate int) []float64 {
+// v0.1.4
+func worldExampleLatest(input []float64, sampleRate int) []float64 {
 	w := world.New(sampleRate, defaultDioOption.FramePeriod)
 
 	// 1. Fundamental frequency
 	timeAxis, f0 := w.Dio(input, defaultDioOption)
 
-	// 2. Spectral envelope
-	spectrogram := w.Star(input, timeAxis, f0)
+	// 2. Refine F0 estimation result
+	f0 = w.StoneMask(input, timeAxis, f0)
 
-	// 3. Apiriodiciy
-	apiriodicity, targetF0 := w.AperiodicityRatioOld(input, f0)
+	// 3. Spectral envelope
+	spectrogram := w.CheapTrick(input, timeAxis, f0)
 
-	// 4. Synthesis
-	return w.SynthesisFromAperiodicityOld(f0, spectrogram, apiriodicity, targetF0, len(input))
+	// 4. Excitation spectrum
+	residual := w.Platinum(input, timeAxis, f0, spectrogram)
+
+	// 5. Synthesis
+	return w.Synthesis(f0, spectrogram, residual, len(input))
 }
 
 func main() {
@@ -93,9 +97,9 @@ func main() {
 
 	// WORLD examples
 	start := time.Now()
-	synthesized := worldExample(input, sampleRate)
+	synthesized := worldExampleLatest(input, sampleRate)
+	//synthesized := worldExample(input, sampleRate)
 	//synthesized := worldExampleAp(input, sampleRate)
-	//synthesized := worldExampleApOld(input, sampleRate)
 
 	// Output elapsed timme
 	fmt.Println("Finished. Elapsed time:", time.Now().Sub(start))
