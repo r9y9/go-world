@@ -13,8 +13,6 @@ package world
 // #include <world/cheaptrick.h>
 // #include <world/aperiodicity.h>
 // #include <world/synthesisfromaperiodicity.h>
-// #include <world/tandem_ap.h>
-// #include <world/synthesis_ap.h>
 // #include <stdlib.h>
 import "C"
 
