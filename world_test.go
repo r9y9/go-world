@@ -23,7 +23,10 @@ func createRandomSignal(length int) []float64 {
 
 func BenchmarkDio(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate) // 10 sec. data
 
 	for i := 0; i < b.N; i++ {
@@ -33,7 +36,10 @@ func BenchmarkDio(b *testing.B) {
 
 func BenchmarkStoneMask(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate)
 
 	timeAxis, f0 := w.Dio(x, defaultDioOption)
@@ -44,7 +50,10 @@ func BenchmarkStoneMask(b *testing.B) {
 
 func BenchmarkStar(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate)
 
 	timeAxis, f0 := w.Dio(x, defaultDioOption)
@@ -55,7 +64,10 @@ func BenchmarkStar(b *testing.B) {
 
 func BenchmarkCheapTrick(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate)
 
 	timeAxis, f0 := w.Dio(x, defaultDioOption)
@@ -66,7 +78,10 @@ func BenchmarkCheapTrick(b *testing.B) {
 
 func BenchmarkPlatinum(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate)
 
 	timeAxis, f0 := w.Dio(x, defaultDioOption)
@@ -78,7 +93,10 @@ func BenchmarkPlatinum(b *testing.B) {
 
 func BenchmarkSynthesis(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate)
 
 	timeAxis, f0 := w.Dio(x, defaultDioOption)
@@ -91,7 +109,10 @@ func BenchmarkSynthesis(b *testing.B) {
 
 func BenchmarkAperiodicityRatio(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate)
 
 	timeAxis, f0 := w.Dio(x, defaultDioOption)
@@ -102,7 +123,10 @@ func BenchmarkAperiodicityRatio(b *testing.B) {
 
 func BenchmarkSynthesisFromAperiodicity(b *testing.B) {
 	sampleRate := 44100
-	w := New(sampleRate, defaultDioOption.FramePeriod)
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
 	x := createRandomSignal(10 * sampleRate)
 
 	timeAxis, f0 := w.Dio(x, defaultDioOption)

@@ -1,4 +1,5 @@
-// Package world provide a Go interface to WORLD - a high-quality speech analysis, modification and synthesis system.
+// Package world provide a Go interface to WORLD - a high-quality speech
+// analysis, modification and synthesis system.
 package world
 
 // Functions in this file ara simple ports to original cpp functions.
@@ -64,7 +65,9 @@ func Dio(x []float64, fs int, option DioOption) ([]float64, []float64) {
 }
 
 func GetSamplesForDIO(fs, x_length int, framePeriod float64) int {
-	return int(C.GetSamplesForDIO(C.int(fs), C.int(x_length), C.double(framePeriod)))
+	return int(C.GetSamplesForDIO(C.int(fs),
+		C.int(x_length),
+		C.double(framePeriod)))
 }
 
 func StoneMask(x []float64, fs int, timeAxis, f0 []float64) []float64 {
@@ -138,7 +141,8 @@ func GetFFTSizeForCheapTrick(fs int) int {
 	return int(C.GetFFTSizeForCheapTrick(C.int(fs)))
 }
 
-func Platinum(x []float64, fs int, timeAxis, f0 []float64, spectrogram [][]float64) [][]float64 {
+func Platinum(x []float64, fs int,
+	timeAxis, f0 []float64, spectrogram [][]float64) [][]float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 	numFreqBins := C.size_t(FFTSize + 1)
 
@@ -163,7 +167,9 @@ func Platinum(x []float64, fs int, timeAxis, f0 []float64, spectrogram [][]float
 	return residualSpectrogram
 }
 
-func Synthesis(f0 []float64, spectrogram, residualSpectrogram [][]float64, framePeriod float64, fs, length int) []float64 {
+func Synthesis(f0 []float64,
+	spectrogram, residualSpectrogram [][]float64,
+	framePeriod float64, fs, length int) []float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 
 	spectrogramUsedInC := Make2DCArrayAlternative(spectrogram)
@@ -183,7 +189,8 @@ func Synthesis(f0 []float64, spectrogram, residualSpectrogram [][]float64, frame
 	return synthesized
 }
 
-func AperiodicityRatio(x []float64, fs int, f0, timeAxis []float64) [][]float64 {
+func AperiodicityRatio(x []float64,
+	fs int, f0, timeAxis []float64) [][]float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 	numBins := C.size_t(FFTSize/2 + 1)
 
@@ -206,7 +213,9 @@ func AperiodicityRatio(x []float64, fs int, f0, timeAxis []float64) [][]float64 
 	return aperiodicity
 }
 
-func SynthesisFromAperiodicity(f0 []float64, spectrogram, aperiodicity [][]float64, framePeriod float64, fs, length int) []float64 {
+func SynthesisFromAperiodicity(f0 []float64,
+	spectrogram, aperiodicity [][]float64,
+	framePeriod float64, fs, length int) []float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
 
 	spectrogramUsedInC := Make2DCArrayAlternative(spectrogram)
