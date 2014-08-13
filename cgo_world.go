@@ -13,10 +13,6 @@ package world
 // #include <world/synthesisfromaperiodicity.h>
 import "C"
 
-const (
-	byteSizeOfFloat64 = 8
-)
-
 type DioOption struct {
 	F0Floor          float64
 	F0Ceil           float64
