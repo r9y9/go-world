@@ -1,6 +1,7 @@
 package world
 
 import (
+	"math"
 	"math/rand"
 	"testing"
 )
@@ -19,6 +20,84 @@ func createRandomSignal(length int) []float64 {
 		x[i] = 32767 * rand.Float64()
 	}
 	return x
+}
+
+func isNaN1D(vec []float64) bool {
+	for _, val := range vec {
+		if math.IsNaN(val) {
+			return true
+		}
+	}
+	return false
+}
+
+func isNaN2D(mat [][]float64) bool {
+	for _, vec := range mat {
+		if isNaN1D(vec) {
+			return true
+		}
+	}
+	return false
+}
+
+func TestWorldNaN(t *testing.T) {
+	sampleRate := 44100
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
+	x := createRandomSignal(10 * sampleRate)
+
+	timeAxis, f0 := w.Dio(x, defaultDioOption)
+	if isNaN1D(timeAxis) {
+		t.Errorf("NaN detected in time axis computed by Dio")
+	}
+	if isNaN1D(f0) {
+		t.Errorf("NaN detected in f0 computed by Dio")
+	}
+
+	spectrogram := w.Star(x, timeAxis, f0)
+	if isNaN2D(spectrogram) {
+		t.Errorf("NaN detected in spectrogram computed by Star")
+	}
+
+	spectrogram = w.CheapTrick(x, timeAxis, f0)
+	if isNaN2D(spectrogram) {
+		t.Errorf("NaN detected in spectrogram computed by CheapTrick")
+	}
+
+	residual := w.Platinum(x, timeAxis, f0, spectrogram)
+	if isNaN2D(residual) {
+		t.Errorf("NaN detected in residual computed by Platinum")
+	}
+
+	y := w.Synthesis(f0, spectrogram, residual, len(x))
+
+	if isNaN1D(y) {
+		t.Errorf("NaN detected in the synthesized signal")
+	}
+}
+
+func TestWorldAperiodicityNaN(t *testing.T) {
+	sampleRate := 44100
+	w := &World{
+		Fs:          sampleRate,
+		FramePeriod: defaultDioOption.FramePeriod,
+	}
+	x := createRandomSignal(10 * sampleRate)
+
+	timeAxis, f0 := w.Dio(x, defaultDioOption)
+	spectrogram := w.CheapTrick(x, timeAxis, f0)
+	aperiodicity := w.AperiodicityRatio(x, f0, timeAxis)
+	if isNaN2D(aperiodicity) {
+		t.Errorf("NaN detected in aperiodicity")
+	}
+
+	y := w.SynthesisFromAperiodicity(f0, spectrogram, aperiodicity, len(x))
+
+	if isNaN1D(y) {
+		t.Errorf("NaN detected in the synthesized signal by aperiodicity")
+	}
 }
 
 func BenchmarkDio(b *testing.B) {
