@@ -1,7 +1,7 @@
 # GO-WORLD [![Build Status](https://travis-ci.org/r9y9/go-world.svg?branch=master)](https://travis-ci.org/r9y9/go-world)
 -------------
 
-Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.4.
+Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.4_2.
 
 Check [original site](http://ml.cs.yamanashi.ac.jp/world/) for details about the WORLD. 
 
