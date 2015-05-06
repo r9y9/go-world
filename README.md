@@ -117,8 +117,6 @@ w.SynthesisFromAperiodicity(f0, spectrogram, apiriodicity, len(input))
 
 ![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/synthesis_from_aperiodicity.png)
 
-![](examples/synthesis_from_aperiodicity.png)
-
 ## Example
 
 see [example/world_example.go](example/world_example.go)
