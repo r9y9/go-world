@@ -31,7 +31,7 @@ func worldExampleAp(input []float64, sampleRate int) []float64 {
 	// 3. Spectral envelope
 	spectrogram := w.CheapTrick(input, timeAxis, f0)
 
-	// 4. Apiriodiciy spectrum
+	// 4. Aperiodicity spectrum
 	apiriodicity := w.AperiodicityRatio(input, f0, timeAxis)
 
 	// 5. Synthesis from aperiodicity
