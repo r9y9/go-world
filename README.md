@@ -45,7 +45,7 @@ Import the package
 
 ```go
 import "github.com/r9y9/go-world"
-``
+```
 
 and create a world instance with sample rate [hz] and frame period [ms].
 
