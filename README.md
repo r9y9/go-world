@@ -1,68 +1,127 @@
-# GO-WORLD [![Build Status](https://travis-ci.org/r9y9/go-world.svg?branch=master)](https://travis-ci.org/r9y9/go-world)
--------------
+# GO-WORLD
 
-Go port to WORLD - a high-quality speech analysis, modification and synthesis system written in C++. The version of WORLD used in this port is 0.1.4_2.
+[![Build Status](https://travis-ci.org/r9y9/go-world.svg?branch=master)](https://travis-ci.org/r9y9/go-world)
+[![GoDoc](https://godoc.org/github.com/r9y9/go-world?status.svg)](https://godoc.org/github.com/r9y9/go-world)
 
-Check [original site](http://ml.cs.yamanashi.ac.jp/world/) for details about the WORLD. 
+GO-WORLD is a Go port to WORLD - a high-quality speech analysis, modification and synthesis system. WORLD provides a way to decompose a speech signal into:
 
-## Install WORLD
+- Fundamental frequency (F0)
+- spectral envelope
+- excitation signal (or aperiodicy used in TANDEM-STRAIGHT)
 
-     git clone git@github.com:r9y9/world.git && cd world
-     ./waf configure && ./waf
-     sudo ./waf install
+and re-synthesize a speech signal from these paramters. See [here](http://ml.cs.yamanashi.ac.jp/world/english/index.html) for the original WORLD.
 
-or download the original code and make & install it (not tested).
+## Supported Platforms
 
-## Install GO-WORLD
+- Linux
+- Mac OS X
 
-    go get github.com/r9y9/go-world
+Note that the original WORLD works in windows as well. In order to use WORLD in windows, you have to build WORLD yourself since currently we don't have a installation script.
 
-## How to use
+## Installation
+
+### Binary dependency
+
+First you need to install WORLD as a shared library:
+
+```bash
+git clone https://github.com/r9y9/WORLD.git && cd world
+git checkout v0.1.4_2_1
+./waf configure && ./waf
+sudo ./waf install
+```
+
+### GO-WORLD
+
+```bash
+go get github.com/r9y9/go-world
+```
+
+complete!
+
+## Usage
 
 Import the package
 
-    import "github.com/r9y9/go-world"
+```go
+import "github.com/r9y9/go-world"
+``
 
 and create a world instance with sample rate [hz] and frame period [ms].
 
-    w := world.New(sampleRate, framePeriod) // e.g. (44100, 5)
+```go
+w := world.New(sampleRate, framePeriod) // e.g. (44100, 5)
+```
 
-and then, do whatever you want with WORLD.
+and then you can do whatever you want with WORLD.
 
-### Dio
+### F0 estimation and refinement
 
-    timeAxis, f0 := w.Dio(input, w.NewDioOption()) // default option is used
+#### Dio
 
-### StoneMask
+```go
+timeAxis, f0 := w.Dio(input, w.NewDioOption()) // default option is used
+```
 
-    refinedF0 := w.StoneMask(input, timeAxis, f0)
+![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/f0_by_dio.png)
 
-### Star (will be deprecated in 0.1.5)
+#### StoneMask
 
-    spectrogram := w.Star(input, timeAxis, f0)
+```go
+refinedF0 := w.StoneMask(input, timeAxis, f0)
+```
 
-### CheapTrick (New in 0.1.4)
+![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/f0_refinement.png)
 
-    spectrogram := w.CheapTrick(input, timeAxis, f0)
+### Spectral envelope estimation
 
-### Platinum
+#### CheapTrick
 
-    residual := w.Platinum(input, timeAxis, f0, spectrogram)
+```go
+spectrogram := w.CheapTrick(input, timeAxis, f0)
+```
+
+![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/envelope_by_cheaptrick.png)
+
+### Excitation signal estimation
+
+#### Platinum
+
+```go
+residual := w.Platinum(input, timeAxis, f0, spectrogram)
+```
+
+Note that the result is spectrum of excitation signal.
 
 ### Synthesis
 
-    synthesized := w.Synthesis(f0, spectrogram, residual, len(input))
+```go
+synthesized := w.Synthesis(f0, spectrogram, residual, len(input))
+```
 
-...check go codes to know more about GO-WORLD.
+![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/synthesis.png)
+
+### Aperiodicity ratio estimation
+
+```go
+apiriodicity := w.AperiodicityRatio(input, f0, timeAxis)
+```
+
+![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/aperiodicity_ratio.png)
+
+### Synthesis from aperiodicity
+
+```go
+w.SynthesisFromAperiodicity(f0, spectrogram, apiriodicity, len(input))
+```
+
+![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/synthesis_from_aperiodicity.png)
+
+![](examples/synthesis_from_aperiodicity.png)
 
 ## Example
 
 see [example/world_example.go](example/world_example.go)
-
-## Docmentation
-
-- [Godoc](http://godoc.org/github.com/r9y9/go-world)
-- [GoWalker](https://gowalker.org/github.com/r9y9/go-world)
 
 ## License
 
