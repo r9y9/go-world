@@ -7,6 +7,7 @@ import (
 	"github.com/r9y9/go-world"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -18,8 +19,7 @@ var defaultDioOption = world.DioOption{
 	Speed:            2,
 }
 
-// v0.1.3
-func worldExample(input []float64, sampleRate int) []float64 {
+func worldExampleAp(input []float64, sampleRate int) []float64 {
 	w := world.New(sampleRate, defaultDioOption.FramePeriod)
 
 	// 1. Fundamental frequency
@@ -29,34 +29,16 @@ func worldExample(input []float64, sampleRate int) []float64 {
 	f0 = w.StoneMask(input, timeAxis, f0)
 
 	// 3. Spectral envelope
-	spectrogram := w.Star(input, timeAxis, f0)
+	spectrogram := w.CheapTrick(input, timeAxis, f0)
 
-	// 4. Excitation spectrum
-	residual := w.Platinum(input, timeAxis, f0, spectrogram)
-
-	// 5. Synthesis
-	return w.Synthesis(f0, spectrogram, residual, len(input))
-}
-
-// v0.1.3
-func worldExampleAp(input []float64, sampleRate int) []float64 {
-	w := world.New(sampleRate, defaultDioOption.FramePeriod)
-
-	// 1. Fundamental frequency
-	timeAxis, f0 := w.Dio(input, defaultDioOption)
-
-	// 2. Spectral envelope
-	spectrogram := w.Star(input, timeAxis, f0)
-
-	// 3. Apiriodiciy
+	// 4. Apiriodiciy spectrum
 	apiriodicity := w.AperiodicityRatio(input, f0, timeAxis)
 
-	// 4. Synthesis
+	// 5. Synthesis from aperiodicity
 	return w.SynthesisFromAperiodicity(f0, spectrogram, apiriodicity, len(input))
 }
 
-// v0.1.4
-func worldExampleLatest(input []float64, sampleRate int) []float64 {
+func worldExample(input []float64, sampleRate int) []float64 {
 	w := world.New(sampleRate, defaultDioOption.FramePeriod)
 
 	// 1. Fundamental frequency
@@ -77,7 +59,6 @@ func worldExampleLatest(input []float64, sampleRate int) []float64 {
 
 func main() {
 	ifilename := flag.String("i", "input.wav", "Input filename")
-	ofilename := flag.String("o", "output.wav", "Output filename")
 	flag.Parse()
 
 	file, err := os.Open(*ifilename)
@@ -95,19 +76,30 @@ func main() {
 	input := w.GetMonoData()
 	sampleRate := int(w.SampleRate)
 
-	// WORLD examples
+	// Synthesis
+	outfile := strings.Replace(*ifilename, ".wav", "_synthesized.wav", -1)
 	start := time.Now()
-	synthesized := worldExampleLatest(input, sampleRate)
-	//synthesized := worldExample(input, sampleRate)
-	//synthesized := worldExampleAp(input, sampleRate)
-
-	// Output elapsed timme
-	fmt.Println("Finished. Elapsed time:", time.Now().Sub(start))
+	synthesized := worldExample(input, sampleRate)
+	fmt.Println("Elapsed time in re-synthesis:", time.Now().Sub(start))
 
 	// Write to file
-	werr = wav.WriteMono(*ofilename, synthesized, w.SampleRate)
+	werr = wav.WriteMono(outfile, synthesized, w.SampleRate)
 	if werr != nil {
 		log.Fatal(werr)
 	}
-	fmt.Println(*ofilename, "is created.")
+	fmt.Println(outfile, "is created.")
+
+	// Synthesis from aperiodicity
+	outfile = strings.Replace(*ifilename, ".wav", "_ap_synthesized.wav", -1)
+	start = time.Now()
+	synthesized = worldExampleAp(input, sampleRate)
+	fmt.Println("Elapsed time in re-synthesis from aperiodicity:",
+		time.Now().Sub(start))
+
+	// Write to file
+	werr = wav.WriteMono(outfile, synthesized, w.SampleRate)
+	if werr != nil {
+		log.Fatal(werr)
+	}
+	fmt.Println(outfile, "is created.")
 }
