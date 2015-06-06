@@ -7,7 +7,7 @@ GO-WORLD is a Go port to WORLD - a high-quality speech analysis, modification an
 
 - Fundamental frequency (F0)
 - spectral envelope
-- excitation signal (or aperiodicy used in TANDEM-STRAIGHT)
+- aperiodicity
 
 and re-synthesize a speech signal from these paramters. See [here](http://ml.cs.yamanashi.ac.jp/world/english/index.html) for the original WORLD.
 
@@ -26,7 +26,7 @@ First you need to install WORLD as a shared library:
 
 ```bash
 git clone https://github.com/r9y9/WORLD.git && cd world
-git checkout v0.1.4_2_1
+git checkout v0.2.0_1
 ./waf configure && ./waf
 sudo ./waf install
 ```
@@ -73,9 +73,7 @@ refinedF0 := w.StoneMask(input, timeAxis, f0)
 
 ![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/f0_refinement.png)
 
-### Spectral envelope estimation
-
-#### CheapTrick
+### Spectral envelope estimation by CheapTrick
 
 ```go
 spectrogram := w.CheapTrick(input, timeAxis, f0)
@@ -83,39 +81,21 @@ spectrogram := w.CheapTrick(input, timeAxis, f0)
 
 ![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/envelope_by_cheaptrick.png)
 
-### Excitation signal estimation
-
-#### Platinum
+### Aperiodicity ratio estimation by D4C
 
 ```go
-residual := w.Platinum(input, timeAxis, f0, spectrogram)
+apiriodicity := w.D4C(input, timeAxis, f0)
 ```
 
-Note that the result is spectrum of excitation signal.
+![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/aperiodicity_by_d4c.png)
 
 ### Synthesis
 
 ```go
-synthesized := w.Synthesis(f0, spectrogram, residual, len(input))
+w.Synthesis(f0, spectrogram, apiriodicity, len(input))
 ```
 
 ![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/synthesis.png)
-
-### Aperiodicity ratio estimation
-
-```go
-apiriodicity := w.AperiodicityRatio(input, f0, timeAxis)
-```
-
-![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/aperiodicity_ratio.png)
-
-### Synthesis from aperiodicity
-
-```go
-w.SynthesisFromAperiodicity(f0, spectrogram, apiriodicity, len(input))
-```
-
-![](https://raw.githubusercontent.com/r9y9/WORLD.jl/master/examples/synthesis_from_aperiodicity.png)
 
 ## Example
 
