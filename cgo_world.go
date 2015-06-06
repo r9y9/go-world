@@ -5,12 +5,9 @@ package world
 // #cgo pkg-config: world
 // #include <world/dio.h>
 // #include <world/stonemask.h>
-// #include <world/platinum.h>
 // #include <world/synthesis.h>
-// #include <world/star.h>
 // #include <world/cheaptrick.h>
-// #include <world/aperiodicity.h>
-// #include <world/synthesisfromaperiodicity.h>
+// #include <world/d4c.h>
 import "C"
 
 type DioOption struct {
@@ -23,11 +20,11 @@ type DioOption struct {
 
 func NewDioOption() DioOption {
 	opt := DioOption{
-		F0Floor:          80.0,
+		F0Floor:          71.0,
 		F0Ceil:           800.0,
 		FramePeriod:      5,
-		ChannelsInOctave: 4.0,
-		Speed:            2,
+		ChannelsInOctave: 2.0,
+		Speed:            1,
 	}
 	return opt
 }
@@ -86,35 +83,6 @@ func StoneMask(x []float64, fs int, timeAxis, f0 []float64) []float64 {
 	return refinedF0
 }
 
-// will be deprecated
-func Star(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
-	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
-	numFreqBins := C.size_t(FFTSize/2 + 1)
-
-	spectrogram := make([][]float64, len(f0))
-	for i := range spectrogram {
-		spectrogram[i] = make([]float64, numFreqBins)
-	}
-
-	spectrogramUsedInC := make2DCArrayAlternative(spectrogram)
-
-	// Perform star
-	C.Star((*C.double)(&x[0]),
-		C.int(len(x)),
-		C.int(fs),
-		(*C.double)(&timeAxis[0]),
-		(*C.double)(&f0[0]),
-		C.int(len(f0)),
-		(**C.double)(&spectrogramUsedInC[0]))
-
-	return spectrogram
-}
-
-// will be deprecated
-func GetFFTSizeForStar(fs int) int {
-	return int(C.GetFFTSizeForStar(C.int(fs)))
-}
-
 func CheapTrick(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
 	FFTSize := C.size_t(C.GetFFTSizeForCheapTrick(C.int(fs)))
 	numFreqBins := C.size_t(FFTSize/2 + 1)
@@ -126,7 +94,6 @@ func CheapTrick(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
 
 	spectrogramUsedInC := make2DCArrayAlternative(spectrogram)
 
-	// Perform star
 	C.CheapTrick((*C.double)(&x[0]),
 		C.int(len(x)),
 		C.int(fs),
@@ -138,61 +105,17 @@ func CheapTrick(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
 	return spectrogram
 }
 
+// GetFFTSizeForStar is deprecated. Use GetFFTSizeForCheapTrick instead.
+func GetFFTSizeForStar(fs int) int {
+	return int(C.GetFFTSizeForCheapTrick(C.int(fs)))
+}
+
 func GetFFTSizeForCheapTrick(fs int) int {
 	return int(C.GetFFTSizeForCheapTrick(C.int(fs)))
 }
 
-func Platinum(x []float64, fs int,
-	timeAxis, f0 []float64, spectrogram [][]float64) [][]float64 {
-	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
-	numFreqBins := C.size_t(FFTSize + 1)
-
-	residualSpectrogram := make([][]float64, len(f0))
-	for i := range residualSpectrogram {
-		residualSpectrogram[i] = make([]float64, numFreqBins)
-	}
-
-	spectrogramUsedInC := make2DCArrayAlternative(spectrogram)
-	residualSpectrogramUsedInC := make2DCArrayAlternative(residualSpectrogram)
-
-	C.Platinum((*C.double)(&x[0]),
-		C.int(len(x)),
-		C.int(fs),
-		(*C.double)(&timeAxis[0]),
-		(*C.double)(&f0[0]),
-		C.int(len(f0)),
-		(**C.double)(&spectrogramUsedInC[0]),
-		C.int(FFTSize),
-		(**C.double)(&residualSpectrogramUsedInC[0]))
-
-	return residualSpectrogram
-}
-
-func Synthesis(f0 []float64,
-	spectrogram, residualSpectrogram [][]float64,
-	framePeriod float64, fs, length int) []float64 {
-	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
-
-	spectrogramUsedInC := make2DCArrayAlternative(spectrogram)
-	residualSpectrogramUsedInC := make2DCArrayAlternative(residualSpectrogram)
-
-	synthesized := make([]float64, length)
-	C.Synthesis((*C.double)(&f0[0]),
-		C.int(len(f0)),
-		(**C.double)(&spectrogramUsedInC[0]),
-		(**C.double)(&residualSpectrogramUsedInC[0]),
-		C.int(FFTSize),
-		C.double(framePeriod),
-		C.int(fs),
-		C.int(len(synthesized)),
-		(*C.double)(&synthesized[0]))
-
-	return synthesized
-}
-
-func AperiodicityRatio(x []float64,
-	fs int, f0, timeAxis []float64) [][]float64 {
-	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
+func D4C(x []float64, fs int, timeAxis, f0 []float64) [][]float64 {
+	FFTSize := C.size_t(C.GetFFTSizeForCheapTrick(C.int(fs)))
 	numBins := C.size_t(FFTSize/2 + 1)
 
 	aperiodicity := make([][]float64, len(f0))
@@ -201,29 +124,27 @@ func AperiodicityRatio(x []float64,
 	}
 	aperiodicityUsedInC := make2DCArrayAlternative(aperiodicity)
 
-	// Peform aperiodicity analysis
-	C.AperiodicityRatio((*C.double)(&x[0]),
+	C.D4C((*C.double)(&x[0]),
 		C.int(len(x)),
 		C.int(fs),
+		(*C.double)(&timeAxis[0]),
 		(*C.double)(&f0[0]),
 		C.int(len(f0)),
-		(*C.double)(&timeAxis[0]),
 		C.int(FFTSize),
 		(**C.double)(&aperiodicityUsedInC[0]))
 
 	return aperiodicity
 }
 
-func SynthesisFromAperiodicity(f0 []float64,
-	spectrogram, aperiodicity [][]float64,
+func Synthesis(f0 []float64, spectrogram, aperiodicity [][]float64,
 	framePeriod float64, fs, length int) []float64 {
-	FFTSize := C.size_t(C.GetFFTSizeForStar(C.int(fs)))
+	FFTSize := C.size_t(C.GetFFTSizeForCheapTrick(C.int(fs)))
 
 	spectrogramUsedInC := make2DCArrayAlternative(spectrogram)
 	aperiodicityUsedInC := make2DCArrayAlternative(aperiodicity)
 
 	synthesized := make([]float64, length)
-	C.SynthesisFromAperiodicity((*C.double)(&f0[0]),
+	C.Synthesis((*C.double)(&f0[0]),
 		C.int(len(f0)),
 		(**C.double)(&spectrogramUsedInC[0]),
 		(**C.double)(&aperiodicityUsedInC[0]),

@@ -33,34 +33,21 @@ func (w *World) StoneMask(x []float64, timeAxis, f0 []float64) []float64 {
 	return StoneMask(x, w.Fs, timeAxis, f0)
 }
 
-// will be deprecated
+// Star is deprecated. Use CheapTrick instead.
 func (w *World) Star(x []float64, timeAxis, f0 []float64) [][]float64 {
-	return Star(x, w.Fs, timeAxis, f0)
+	return CheapTrick(x, w.Fs, timeAxis, f0)
 }
 
 func (w *World) CheapTrick(x []float64, timeAxis, f0 []float64) [][]float64 {
 	return CheapTrick(x, w.Fs, timeAxis, f0)
 }
 
-func (w *World) Platinum(x []float64, timeAxis, f0 []float64,
-	spectrogram [][]float64) [][]float64 {
-	return Platinum(x, w.Fs, timeAxis, f0, spectrogram)
+func (w *World) D4C(x, timeAxis, f0 []float64) [][]float64 {
+	return D4C(x, w.Fs, timeAxis, f0)
 }
 
 func (w *World) Synthesis(f0 []float64,
-	spectrogram, residualSpectrogram [][]float64,
-	length int) []float64 {
-	return Synthesis(f0, spectrogram, residualSpectrogram,
-		w.FramePeriod, w.Fs, length)
-}
-
-func (w *World) AperiodicityRatio(x []float64,
-	f0 []float64, timeAxis []float64) [][]float64 {
-	return AperiodicityRatio(x, w.Fs, f0, timeAxis)
-}
-
-func (w *World) SynthesisFromAperiodicity(f0 []float64,
 	spectrogram, aperiodicity [][]float64, length int) []float64 {
-	return SynthesisFromAperiodicity(f0, spectrogram, aperiodicity,
-		w.FramePeriod, w.Fs, length)
+	return Synthesis(f0, spectrogram, aperiodicity, w.FramePeriod,
+		w.Fs, length)
 }
