@@ -10,7 +10,7 @@ install:
   - export LD_LIBRARY_PATH="/usr/local/lib"
   - cd $HOME
   - git clone https://github.com/r9y9/world.git && cd world
-  - git checkout v0.2.0_1
+  - git checkout v0.2.1-2
   - ./waf configure && ./waf
   - sudo ./waf install
   - cd $TRAVIS_BUILD_DIR

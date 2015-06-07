@@ -26,7 +26,7 @@ First you need to install WORLD as a shared library:
 
 ```bash
 git clone https://github.com/r9y9/WORLD.git && cd world
-git checkout v0.2.0_1
+git checkout v0.2.1-2
 ./waf configure && ./waf
 sudo ./waf install
 ```
