@@ -8,6 +8,7 @@ package world
 // #include <world/synthesis.h>
 // #include <world/cheaptrick.h>
 // #include <world/d4c.h>
+// #include <world/version.h>
 import "C"
 
 type DioOption struct {
@@ -16,6 +17,7 @@ type DioOption struct {
 	ChannelsInOctave float64
 	FramePeriod      float64 // [ms]
 	Speed            int     // (1,2, ..., 12)
+	AllowedRange     float64 // recommended: 0.02 * FramePeriod
 }
 
 func NewDioOption() DioOption {
@@ -25,6 +27,7 @@ func NewDioOption() DioOption {
 		FramePeriod:      5,
 		ChannelsInOctave: 2.0,
 		Speed:            1,
+		AllowedRange:     0.1,
 	}
 	return opt
 }
@@ -50,6 +53,7 @@ func Dio(x []float64, fs int, option DioOption) ([]float64, []float64) {
 	opt.f0_ceil = C.double(option.F0Ceil)
 	opt.channels_in_octave = C.double(option.ChannelsInOctave)
 	opt.speed = C.int(option.Speed)
+	opt.allowed_range = C.double(option.AllowedRange)
 
 	// Perform DIO
 	C.Dio((*C.double)(&x[0]),
